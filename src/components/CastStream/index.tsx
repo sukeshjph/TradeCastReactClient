@@ -1,24 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useContext } from "react";
 import { randNumber } from "@ngneat/falso";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { nanoid } from "nanoid";
-// import axios from "axios";
 
-export enum Status {
-  ACTIVE = "Active",
-  CANCELLED = "Cancelled",
-}
-
-export interface Cast {
-  originatorUserId: number;
-  bondId: number;
-  side: "Buy" | "Sell";
-  price: number | undefined;
-  quantity: number | undefined;
-  status: Status;
-  targetUserIds: number[];
-  id: string;
-}
+import { Cast } from "../../model";
+import { CastContext } from "../../App";
 
 const columns: GridColDef[] = [
   {
@@ -48,21 +34,23 @@ const columns: GridColDef[] = [
   },
 ];
 
-export const Events = () => {
-  const [allCasts, setAllCasts] = useState<Cast[]>([]);
+export const CastStream = () => {
+  const { localCastState, setLocalCastState } = useContext(CastContext);
+  const { allCasts } = localCastState;
   const targetUserId = randNumber({ min: 200, max: 3000 });
 
   useEffect(() => {
     const sse = new EventSource(
-      `http://localhost:4000/sse?targetUserId=${targetUserId}`
+      `${process.env.REACT_APP_API_URL}sse?targetUserId=${targetUserId}`
     );
 
     const updateStreamDataToPanel = (data: string) => {
       const parsedCast: Cast = JSON.parse(data);
-      setAllCasts((prevState) => [
+
+      setLocalCastState((prevState) => ({
         ...prevState,
-        { ...parsedCast, id: nanoid() },
-      ]);
+        allCasts: [...prevState.allCasts, { ...parsedCast, id: nanoid() }],
+      }));
     };
 
     sse.addEventListener("streamCasts", ({ data }) => {
