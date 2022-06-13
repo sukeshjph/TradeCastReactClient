@@ -22,4 +22,4 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 ### `npm run build`
 
 The app is deployed in Vercell:
-https://trade-cast-react-client-m3ulv94c1-sukeshjph.vercel.app/
+https://trade-cast-react-client.vercel.app/
